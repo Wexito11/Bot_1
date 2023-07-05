@@ -16,7 +16,30 @@ def Nonone(Text):
 def site(message):
     webbrowser.open('http://vk.com')
 
+#Crear botones debajo chat
+@bot.message_handler(commands = ['start'])
+def start(message):
+    markup = types.ReplyKeyboardMarkup()
+    btn1 = types.KeyboardButton('Перейти на саит')
+    markup.row(btn1)
+    btn2 = types.KeyboardButton('Удалить фото')
+    btn3 = types.KeyboardButton('Изменить текст')
+    markup.row(btn2, btn3)
+    file = open('./SKW.png', 'rb')
+    bot.send_photo(message.chat.id, file, reply_markup=markup)
+    #bot.send_message(message.chat.id, 'Привет', reply_markup=markup)
+    #Registrar 
+    bot.register_next_step_handler(message, on_click)
+
+def on_click(message):
+    if message.text == 'Перейти на саит':
+        bot.send_message(message.chat.id, 'Webside is open')
+    elif message.text == 'Удалить фото':
+        bot.send_message(message.chat.id, 'Delete')
+
+
 #Imagen, audio, video esperado
+#Crear botones en el chat
 @bot.message_handler(content_types = ['photo'])
 def get_photo(message):
     markup = types.InlineKeyboardMarkup()
@@ -28,17 +51,17 @@ def get_photo(message):
     bot.reply_to(message, "Интересно", reply_markup=markup)
 
 #callback_data convoca este decorador
-#callback: true confirmar no esta vacio
-@bot.callback_query_handler(func=lambda callback: true)
+#callback: True confirmar no esta vacio
+@bot.callback_query_handler(func=lambda callback: True)
 def callback_message(callback):
     if callback.data =='delete':
-        bot.delete_message(callback.message.chat.id, callback.message.message_id)
+        bot.delete_message(callback.message.chat.id, callback.message.message_id - 1)
     if callback.data =='edit':
         bot.edit_message_text('Edit text',callback.message.chat.id, callback.message.message_id)    
 
-@bot.message_handler(commands = ['start'])
+""" @bot.message_handler(commands = ['start'])
 def start(message):
-    bot.send_message(message.chat.id, f"Привет, {Nonone(message.from_user.first_name)} {Nonone(message.from_user.last_name)}")
+    bot.send_message(message.chat.id, f"Привет, {Nonone(message.from_user.first_name)} {Nonone(message.from_user.last_name)}") """
 
 @bot.message_handler(commands = ['help'])
 def help(message):
@@ -53,11 +76,11 @@ def main(message):
 #Para cualquier mensage tipo texto
 @bot.message_handler()
 def info(message):
-    if message.text.lower() == "привет" or "Здравствуйте":
+    if message.text.lower() == ("привет" or "Здравствуйте"):
         bot.send_message(message.chat.id, f"Привет, {Nonone(message.from_user.first_name)} {Nonone(message.from_user.last_name)}")
     elif message.text.lower() == "id":
         bot.reply_to(message, f'ID: {message.from_user.id}')
-    elif message.text.lower() == 'site' or 'website':
+    elif message.text.lower() == ('site' or 'website'):
         webbrowser.open('http://vk.com')
     elif message.text.lower() == 'help':
         bot.send_message(message.chat.id, "<b>Help</b> <em><u>information</u></em>...", parse_mode='html')
