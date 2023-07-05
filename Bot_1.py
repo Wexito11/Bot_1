@@ -27,6 +27,15 @@ def get_photo(message):
     markup.row(btn2, btn3)
     bot.reply_to(message, "Интересно", reply_markup=markup)
 
+#callback_data convoca este decorador
+#callback: true confirmar no esta vacio
+@bot.callback_query_handler(func=lambda callback: true)
+def callback_message(callback):
+    if callback.data =='delete':
+        bot.delete_message(callback.message.chat.id, callback.message.message_id)
+    if callback.data =='edit':
+        bot.edit_message_text('Edit text',callback.message.chat.id, callback.message.message_id)    
+
 @bot.message_handler(commands = ['start'])
 def start(message):
     bot.send_message(message.chat.id, f"Привет, {Nonone(message.from_user.first_name)} {Nonone(message.from_user.last_name)}")
