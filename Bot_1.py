@@ -1,6 +1,7 @@
 import telebot
 from telebot import types
 import webbrowser
+import sqlite3
 
 bot = telebot.TeleBot('6134115976:AAHpQeeXxx-D7u7gniTb9ojK7hbFYlK5MgM')
 
@@ -16,6 +17,60 @@ def Nonone(Text):
 def site(message):
     webbrowser.open('http://vk.com')
 
+name = None
+
+#Подключение к базе данных
+@bot.message_handler(commands = ['start1'])
+def start1(message):
+    conn = sqlite3.connect('Tel_Bot_1')
+    cur = conn.cursor()
+
+    cur.execute('CREATE TABLE IF NOT EXISTS users (id int auto_increment primary key, name varchar(50), pass varchar(50))')
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    bot.send_message(message.chat.id, 'Привет, сейчас тебя зарегистрируем! Ввидете ваше имя')
+    bot.register_next_step_handler(message, user_name)
+
+
+def user_name(message):
+    global name 
+    name = message.text.strip()
+    bot.send_message(message.chat.id, 'Ввидете пароль')
+    bot.register_next_step_handler(message, user_pass)
+
+def user_pass(message):
+    password = message.text.strip()
+    conn = sqlite3.connect('Tel_Bot_1')
+    cur = conn.cursor()
+    cur.execute("INSERT INTO users (name, pass) VALUES ('%s', '%s')" % (name, password))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    markup = telebot.types.InlineKeyboardMarkup()
+    markup.add(telebot.types.InlineKeyboardButton('Список пользователей', callback_data='users'))
+    bot.send_message(message.chat.id, 'Пользователь зарегистрирован!', reply_markup=markup)
+    #bot.registrer_next_step.handler(message, user_pass)
+
+@bot.callback_query_handler(func = lambda call : True)
+def callback(call):
+    conn = sqlite3.connect('Tel_Bot_1')
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM users')
+    users = cur.fetchall()
+
+    info = ""
+    for el in users:
+        info += f'Имя: {el[1]}, Пароль: {el[2]}\n'
+
+    cur.close()
+    conn.close()
+    bot.send_message(call.message.chat.id, info)
+
+
+"""
 #Crear botones debajo chat
 @bot.message_handler(commands = ['start'])
 def start(message):
@@ -25,11 +80,14 @@ def start(message):
     btn2 = types.KeyboardButton('Удалить фото')
     btn3 = types.KeyboardButton('Изменить текст')
     markup.row(btn2, btn3)
+    #Mandar foto
     file = open('./SKW.png', 'rb')
     bot.send_photo(message.chat.id, file, reply_markup=markup)
+    #bot.send_audio()
+    #bot.send_video()
     #bot.send_message(message.chat.id, 'Привет', reply_markup=markup)
     #Registrar 
-    bot.register_next_step_handler(message, on_click)
+    bot.register_next_step_handler(message, on_click)"""
 
 def on_click(message):
     if message.text == 'Перейти на саит':
@@ -52,12 +110,12 @@ def get_photo(message):
 
 #callback_data convoca este decorador
 #callback: True confirmar no esta vacio
-@bot.callback_query_handler(func=lambda callback: True)
+"""@bot.callback_query_handler(func=lambda callback: True)
 def callback_message(callback):
     if callback.data =='delete':
         bot.delete_message(callback.message.chat.id, callback.message.message_id - 1)
     if callback.data =='edit':
-        bot.edit_message_text('Edit text',callback.message.chat.id, callback.message.message_id)    
+        bot.edit_message_text('Edit text',callback.message.chat.id, callback.message.message_id)    """
 
 """ @bot.message_handler(commands = ['start'])
 def start(message):
